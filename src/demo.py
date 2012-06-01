@@ -1,9 +1,14 @@
+'''
+@author: Craig Macomber
+@license: BSD-license
+'''
+
 from pandac.PandaModules import Light,AmbientLight,DirectionalLight
 from pandac.PandaModules import NodePath
 from pandac.PandaModules import Vec3,Vec4,Mat4,VBase4,Point3
 from direct.task.Task import Task
 
-from tree2 import *
+from tree import *
 
 from direct.showbase.ShowBase import ShowBase
 base = ShowBase()
