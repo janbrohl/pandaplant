@@ -30,7 +30,7 @@ def _randomBend(quat, maxBend=30):
 
 def _angleRandomAxis(quat, angle,maxBend=30):
     q=Quat()
-    #power of 2 here makes distrobution even withint a circle
+    #power of 2 here makes distribution even withint a circle
     # (makes larger bends are more likley as they are further spread)
     bendAngle=(random.random()**2)*maxBend
     #gauss might be more realistic but actually is far from perfect
@@ -66,7 +66,6 @@ class FractalTree(NodePath):
     #this makes a flattened version of the tree for faster rendering...
     def getStatic(self):
         np = NodePath(self.node().copySubgraph())
-
         np.flattenStrong()
         return np       
    
@@ -127,13 +126,11 @@ class FractalTree(NodePath):
         vdata = self.bodydata
         circleGeom = Geom(vdata)
         vertWriter = GeomVertexWriter(vdata, "vertex")
-        #colorWriter = GeomVertexWriter(vdata, "color")
         normalWriter = GeomVertexWriter(vdata, "normal")
         drawReWriter = GeomVertexRewriter(vdata, "drawFlag")
         texReWriter = GeomVertexRewriter(vdata, "texcoord")
         startRow = vdata.getNumRows()
         vertWriter.setRow(startRow)
-        #colorWriter.setRow(startRow)
         normalWriter.setRow(startRow)       
         sCoord = 0   
         if (startRow != 0):
@@ -147,7 +144,6 @@ class FractalTree(NodePath):
        
         angleSlice = 2 * math.pi / numVertices
         currAngle = 0
-        #axisAdj=Mat4.rotateMat(45, axis)*Mat4.scaleMat(radius)*Mat4.translateMat(pos)
         perp1 = quat.getRight()
         perp2 = quat.getForward()   
         #vertex information is written here
@@ -157,7 +153,6 @@ class FractalTree(NodePath):
             normalWriter.addData3f(normal)
             vertWriter.addData3f(adjCircle)
             texReWriter.addData2f(1.0*i / numVertices,sCoord)
-            #colorWriter.addData4f(0.5, 0.5, 0.5, 1)
             drawReWriter.addData1f(keepDrawing)
             currAngle += angleSlice 
         drawReader = GeomVertexReader(vdata, "drawFlag")
@@ -182,12 +177,7 @@ class FractalTree(NodePath):
     def drawLeaf(self, pos=Vec3(0, 0, 0), quat=None, scale=0.125):
         #use the vectors that describe the direction the branch grows to make the right
         #rotation matrix
-        newCs = Mat4()#0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-#         newCs.setRow(0, vecList[2]) #right
-#         newCs.setRow(1, vecList[1]) #up
-#         newCs.setRow(2, vecList[0]) #forward
-#         newCs.setRow(3, Vec3(0, 0, 0))
-#         newCs.setCol(3, Vec4(0, 0, 0, 1))   
+        newCs = Mat4() 
         quat.extractToMatrix(newCs)
         axisAdj = Mat4.scaleMat(scale) * newCs * Mat4.translateMat(pos)       
         leafModel = NodePath("leaf")
@@ -196,11 +186,11 @@ class FractalTree(NodePath):
         leafModel.setTransform(TransformState.makeMat(axisAdj))
 
        
-    def grow(self, num=1, removeLeaves=True, leavesScale=1):
+    def grow(self, num=1, removeLeaves=True, leavesScale=1, scale=1.125):
         self.iterations += num
         while num > 0:
-            self.setScale(self, 1.1)
-            self.leafModel.setScale(self.leafModel, leavesScale / 1.1)
+            self.setScale(self, scale)
+            self.leafModel.setScale(self.leafModel, leavesScale / scale)
             if removeLeaves:
                 for c in self.leaves.getChildren():
                     c.removeNode()
@@ -219,30 +209,26 @@ class DefaultTree(FractalTree):
         leafTexture = base.loader.loadTexture('models/tree/material-10-cl.png')
         leafModel.setTexture(leafTexture, 1)       
         lengthList = self.makeLengthList(Vec3(0, 0, 1), 64)
-        numCopiesList = self.makeNumCopiesList(4, 3, 64)
+        numCopiesList = self.makeNumCopiesList(3, 3, 64)
         radiusList = self.makeRadiusList(0.5, 64, numCopiesList)
         FractalTree.__init__(self, barkTexture, leafModel, lengthList, numCopiesList, radiusList)
        
     @staticmethod
-    def makeRadiusList(radius, iterations, numCopiesList, scale=1.5):
+    def makeRadiusList(radius, iterations, numCopiesList, scale=1.125):
         l = [radius]
         for i in xrange(1, iterations):
-            #if i % 3 == 0:
             if i != 1 and numCopiesList[i - 2]:
                 radius /= numCopiesList[i - 2] ** 0.5
             else:
-                radius /= scale ** (1.0 / 3)
+                radius /= scale
             l.append(radius)
         return l
    
     @staticmethod
-    def makeLengthList(length, iterations, sx=2.0, sy=2.0, sz=1.25):
+    def makeLengthList(length, iterations, sx=1.125, sy=1.125, sz=1.125):
         l = [length]
         for i in xrange(1, iterations):
-            #if i % 3 == 0:
-                #decrease dimensions when we branch
-                #length = Vec3(length.getX() / 2, length.getY() / 2, length.getZ() / 1.1)
-            length = Vec3(length.getX() / sx ** (1.0 / 3), length.getY() / sy ** (1.0 / 3), length.getZ() / sz ** (1.0 / 3))
+            length = Vec3(length.getX() / sx, length.getY() / sy , length.getZ() / sz)
             l.append(length)
         return l
    
