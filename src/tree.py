@@ -21,11 +21,19 @@ from pandac.PandaModules import NodePath, Geom, GeomNode, GeomVertexArrayFormat,
 from pandac.PandaModules import Mat4, Vec3, Vec4, CollisionNode, CollisionTube, Point3, Quat
 import math, random
 
+def clamp(value, minval,maxval):
+    if value>maxval:
+        return maxval
+    elif value<minval:
+        return minval
+    else:
+        return value
+
 #this is for making the tree not too straight
 def _randomBend(quat, maxBend=30):
-    #angle=random.gauss(0,90)
+    #angle=clamp(random.gauss(0,45),-90,90)
     #not sure which is better
-    angle=random.randint(-180,180) 
+    angle=random.randint(-90,90) 
     return _angleRandomAxis(quat, angle, maxBend)
 
 def _angleRandomAxis(quat, angle,maxBend=30):
@@ -34,7 +42,7 @@ def _angleRandomAxis(quat, angle,maxBend=30):
     # (makes larger bends are more likley as they are further spread)
     bendAngle=(random.random()**2)*maxBend
     #gauss might be more realistic but actually is far from perfect
-    #bendAngle=random.gauss(0,maxBend*0.8)
+    #bendAngle=clamp(random.gauss(0,maxBend*0.5),0,maxBend)
     q.setHpr((angle,bendAngle,0))
     return q*quat
 
