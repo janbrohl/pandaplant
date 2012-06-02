@@ -21,10 +21,10 @@ from pandac.PandaModules import NodePath, Geom, GeomNode, GeomVertexArrayFormat,
 from pandac.PandaModules import Mat4, Vec3, Vec4, CollisionNode, CollisionTube, Point3, Quat
 import math, random
 
-def clamp(value, minval,maxval):
-    if value>maxval:
+def clamp(value, minval, maxval):
+    if value > maxval:
         return maxval
-    elif value<minval:
+    elif value < minval:
         return minval
     else:
         return value
@@ -33,18 +33,18 @@ def clamp(value, minval,maxval):
 def _randomBend(quat, maxBend=30):
     #angle=clamp(random.gauss(0,45),-90,90)
     #not sure which is better
-    angle=random.randint(-90,90) 
+    angle = random.randint(-90, 90) 
     return _angleRandomAxis(quat, angle, maxBend)
 
-def _angleRandomAxis(quat, angle,maxBend=30):
-    q=Quat()
+def _angleRandomAxis(quat, angle, maxBend=30):
+    q = Quat()
     #power of 2 here makes distribution even withint a circle
     # (makes larger bends are more likley as they are further spread)
-    bendAngle=(random.random()**2)*maxBend
+    bendAngle = (random.random() ** 2) * maxBend
     #gauss might be more realistic but actually is far from perfect
     #bendAngle=clamp(random.gauss(0,maxBend*0.5),0,maxBend)
-    q.setHpr((angle,bendAngle,0))
-    return q*quat
+    q.setHpr((angle, bendAngle, 0))
+    return q * quat
 
 
 class FractalTree(NodePath):
@@ -89,7 +89,7 @@ class FractalTree(NodePath):
         cls.__format = GeomVertexFormat.registerFormat(format)
    
     def makeEnds(self, pos=Vec3(0, 0, 0), quat=None):
-        if quat is None: quat=Quat()
+        if quat is None: quat = Quat()
         self.ends = [(pos, quat, 0)]
        
     def makeFromStack(self, makeColl=False):
@@ -105,7 +105,7 @@ class FractalTree(NodePath):
             if depth != to and depth + 1 < len(lengthList):               
                 self.drawBody(pos, quat, radiusList[depth])     
                 #move foward along the right axis
-                newPos = pos + quat.xform( length)
+                newPos = pos + quat.xform(length)
                 if makeColl:
                     self.makeColl(pos, newPos, radiusList[depth])
                 numCopies = numCopiesList[depth] 
@@ -155,12 +155,12 @@ class FractalTree(NodePath):
         perp1 = quat.getRight()
         perp2 = quat.getForward()   
         #vertex information is written here
-        for i in xrange(numVertices+1): #doubles the last vertex to fix UV seam
+        for i in xrange(numVertices + 1): #doubles the last vertex to fix UV seam
             adjCircle = pos + (perp1 * math.cos(currAngle) + perp2 * math.sin(currAngle)) * radius
             normal = perp1 * math.cos(currAngle) + perp2 * math.sin(currAngle)       
             normalWriter.addData3f(normal)
             vertWriter.addData3f(adjCircle)
-            texReWriter.addData2f(1.0*i / numVertices,sCoord)
+            texReWriter.addData2f(1.0 * i / numVertices, sCoord)
             drawReWriter.addData1f(keepDrawing)
             currAngle += angleSlice 
         drawReader = GeomVertexReader(vdata, "drawFlag")
@@ -168,9 +168,9 @@ class FractalTree(NodePath):
         #we cant draw quads directly so we use Tristrips
         if (startRow != 0) and (drawReader.getData1f() != False):
             lines = GeomTristrips(Geom.UHStatic)         
-            for i in xrange(numVertices+1):
+            for i in xrange(numVertices + 1):
                 lines.addVertex(i + startRow)
-                lines.addVertex(i + startRow - numVertices-1)
+                lines.addVertex(i + startRow - numVertices - 1)
             lines.addVertex(startRow)
             lines.addVertex(startRow - numVertices)
             lines.closePrimitive()
@@ -209,12 +209,15 @@ FractalTree.makeFMT()
 
 
 class DefaultTree(FractalTree):
+    barkTexturePath = "models/tree/default/barkTexture.jpg"
+    leafModelPath = 'models/tree/default/shrubbery'
+    leafTexturePath = 'models/tree/default/material-10-cl.png'
     def __init__(self):       
-        barkTexture = base.loader.loadTexture("models/tree/default/barkTexture.jpg")
-        leafModel = base.loader.loadModel('models/tree/default/shrubbery')
+        barkTexture = base.loader.loadTexture(self.barkTexturePath)
+        leafModel = base.loader.loadModel(self.leafModelPath)
         leafModel.clearModelNodes()
         leafModel.flattenStrong()
-        leafTexture = base.loader.loadTexture('models/tree/default/material-10-cl.png')
+        leafTexture = base.loader.loadTexture(self.leafTexturePath)
         leafModel.setTexture(leafTexture, 1)       
         lengthList = self.makeLengthList(Vec3(0, 0, 1), 64)
         numCopiesList = self.makeNumCopiesList(3, 3, 64)
