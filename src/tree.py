@@ -48,7 +48,6 @@ def _angleRandomAxis(quat, angle, maxBend=30):
 
 
 class FractalTree(NodePath):
-    __format = None
     def __init__(self, barkTexture, leafModel, lengthList, numCopiesList, radiusList):
         NodePath.__init__(self, "Tree Holder")
         self.numPrimitives = 0
@@ -57,7 +56,8 @@ class FractalTree(NodePath):
         self.bodies = NodePath("Bodies")
         self.leaves = NodePath("Leaves")
         self.coll = self.attachNewNode(CollisionNode("Collision"))   
-        self.bodydata = GeomVertexData("body vertices", self.__format, Geom.UHStatic)
+        self.bodydata = GeomVertexData("body vertices", GeomVertexFormat.getV3n3t2(), Geom.UHStatic)
+        self.drawFlags=set()
         self.numCopiesList = list(numCopiesList)   
         self.radiusList = list(radiusList) 
         self.lengthList = list(lengthList) 
@@ -77,17 +77,7 @@ class FractalTree(NodePath):
         np.flattenStrong()
         return np       
    
-    #this should make only one instance
-    @classmethod
-    def makeFMT(cls):
-        if cls.__format is not None:
-            return
-        formatArray = GeomVertexArrayFormat()
-        formatArray.addColumn(InternalName.make("drawFlag"), 1, Geom.NTUint8, Geom.COther)   
-        format = GeomVertexFormat(GeomVertexFormat.getV3n3t2())
-        format.addArray(formatArray)
-        cls.__format = GeomVertexFormat.registerFormat(format)
-   
+      
     def makeEnds(self, pos=Vec3(0, 0, 0), quat=None):
         if quat is None: quat = Quat()
         self.ends = [(pos, quat, 0)]
@@ -135,7 +125,6 @@ class FractalTree(NodePath):
         circleGeom = Geom(vdata)
         vertWriter = GeomVertexWriter(vdata, "vertex")
         normalWriter = GeomVertexWriter(vdata, "normal")
-        drawReWriter = GeomVertexRewriter(vdata, "drawFlag")
         texReWriter = GeomVertexRewriter(vdata, "texcoord")
         startRow = vdata.getNumRows()
         vertWriter.setRow(startRow)
@@ -144,10 +133,10 @@ class FractalTree(NodePath):
         if (startRow != 0):
             texReWriter.setRow(startRow - numVertices)
             sCoord = texReWriter.getData2f().getX() + 1           
-            drawReWriter.setRow(startRow - numVertices)
-            if(drawReWriter.getData1f() == False):
+            draw=(startRow - numVertices) in self.drawFlags
+            if not draw:
                 sCoord -= 1
-        drawReWriter.setRow(startRow)
+        drawIndex=startRow
         texReWriter.setRow(startRow)   
        
         angleSlice = 2 * math.pi / numVertices
@@ -161,12 +150,13 @@ class FractalTree(NodePath):
             normalWriter.addData3f(normal)
             vertWriter.addData3f(adjCircle)
             texReWriter.addData2f(1.0 * i / numVertices, sCoord)
-            drawReWriter.addData1f(keepDrawing)
-            currAngle += angleSlice 
-        drawReader = GeomVertexReader(vdata, "drawFlag")
-        drawReader.setRow(startRow - numVertices)   
+            if keepDrawing:
+                self.drawFlags.add(drawIndex)
+            drawIndex+=1
+            currAngle += angleSlice
+        draw=(startRow - numVertices) in self.drawFlags 
         #we cant draw quads directly so we use Tristrips
-        if (startRow != 0) and (drawReader.getData1f() != False):
+        if (startRow != 0) and draw:
             lines = GeomTristrips(Geom.UHStatic)         
             for i in xrange(numVertices + 1):
                 lines.addVertex(i + startRow)
@@ -205,7 +195,6 @@ class FractalTree(NodePath):
             self.makeFromStack()
             self.bodies.setTexture(self.barkTexture)         
             num -= 1
-FractalTree.makeFMT()
 
 class SimpleTree(FractalTree):        
     @staticmethod
