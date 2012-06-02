@@ -207,23 +207,7 @@ class FractalTree(NodePath):
             num -= 1
 FractalTree.makeFMT()
 
-
-class DefaultTree(FractalTree):
-    barkTexturePath = "models/tree/default/barkTexture.jpg"
-    leafModelPath = 'models/tree/default/shrubbery'
-    leafTexturePath = 'models/tree/default/material-10-cl.png'
-    def __init__(self):       
-        barkTexture = base.loader.loadTexture(self.barkTexturePath)
-        leafModel = base.loader.loadModel(self.leafModelPath)
-        leafModel.clearModelNodes()
-        leafModel.flattenStrong()
-        leafTexture = base.loader.loadTexture(self.leafTexturePath)
-        leafModel.setTexture(leafTexture, 1)       
-        lengthList = self.makeLengthList(Vec3(0, 0, 1), 64)
-        numCopiesList = self.makeNumCopiesList(3, 3, 64)
-        radiusList = self.makeRadiusList(0.5, 64, numCopiesList)
-        FractalTree.__init__(self, barkTexture, leafModel, lengthList, numCopiesList, radiusList)
-       
+class SimpleTree(FractalTree):        
     @staticmethod
     def makeRadiusList(radius, iterations, numCopiesList, scale=1.125):
         l = [radius]
@@ -253,6 +237,25 @@ class DefaultTree(FractalTree):
                 l.append(0)
         return l
 
+
+class DefaultTree(SimpleTree):
+    barkTexturePath = "models/tree/default/barkTexture.jpg"
+    leafModelPath = 'models/tree/default/shrubbery'
+    leafTexturePath = 'models/tree/default/material-10-cl.png'
+    
+    def __init__(self, radius=0.5, numCopies=3, branchat=3, iterations=64):       
+        barkTexture = base.loader.loadTexture(self.barkTexturePath)
+        leafModel = base.loader.loadModel(self.leafModelPath)
+        leafModel.clearModelNodes()
+        leafModel.flattenStrong()
+        leafTexture = base.loader.loadTexture(self.leafTexturePath)
+        leafModel.setTexture(leafTexture, 1)       
+        lengthList = self.makeLengthList(Vec3(0, 0, 1), iterations)
+        numCopiesList = self.makeNumCopiesList(numCopies, branchat, iterations)
+        radiusList = self.makeRadiusList(radius, iterations, numCopiesList)
+        SimpleTree.__init__(self, barkTexture, leafModel, lengthList, numCopiesList, radiusList)
+       
+    
 #this grows a tree
 if __name__ == "__main__":
     from direct.showbase.ShowBase import ShowBase
