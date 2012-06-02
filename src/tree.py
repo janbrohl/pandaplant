@@ -21,6 +21,9 @@ from pandac.PandaModules import Mat4, Vec3, Vec4, CollisionNode, CollisionTube, 
 import math, random
 
 def clamp(value, minval, maxval):
+    """
+    clamp a value to at least minval and maxval at most
+    """
     if value > maxval:
         return maxval
     elif value < minval:
@@ -47,7 +50,13 @@ def _angleRandomAxis(quat, angle, maxBend=30):
 
 
 class FractalTree(NodePath):
+    """
+    Base class for fractal trees
+    """
     def __init__(self, barkTexture, leafModel, lengthList, numCopiesList, radiusList):
+        """
+        make tree from params
+        """        
         NodePath.__init__(self, "Tree Holder")
         self.numPrimitives = 0
         self.leafModel = leafModel
@@ -56,7 +65,7 @@ class FractalTree(NodePath):
         self.leaves = NodePath("Leaves")
         self.coll = self.attachNewNode(CollisionNode("Collision"))   
         self.bodydata = GeomVertexData("body vertices", GeomVertexFormat.getV3n3t2(), Geom.UHStatic)
-        self.drawFlags=set()
+        self.drawFlags = set()
         self.numCopiesList = list(numCopiesList)   
         self.radiusList = list(radiusList) 
         self.lengthList = list(lengthList) 
@@ -70,18 +79,27 @@ class FractalTree(NodePath):
         self.bodies.reparentTo(self)
         self.leaves.reparentTo(self)
        
-    #this makes a flattened version of the tree for faster rendering...
     def getStatic(self):
+        """
+        this makes a flattened version of the tree for faster rendering...
+        """
         np = NodePath(self.node().copySubgraph())
         np.flattenStrong()
         return np       
    
       
     def makeEnds(self, pos=Vec3(0, 0, 0), quat=None):
-        if quat is None: quat = Quat()
+        """
+        add initial stem-end to the stack of ends
+        """
+        if quat is None:
+            quat = Quat()
         self.ends = [(pos, quat, 0)]
        
     def makeFromStack(self, makeColl=False):
+        """
+        update tree geometry using existing ends
+        """
         stack = self.ends
         to = self.iterations
         lengthList = self.lengthList
@@ -112,14 +130,21 @@ class FractalTree(NodePath):
         self.ends = ends
        
     def makeColl(self, pos, newPos, radius):
+        """
+        make a collision tube for the given stem-parameters
+        """
         tube = CollisionTube(Point3(pos), Point3(newPos), radius)
         self.coll.node().addSolid(tube)
          
-    #this draws the body of the tree. This draws a ring of vertices and connects the rings with
-    #triangles to form the body.
-    #this keepDrawing paramter tells the function wheter or not we're at an end
-    #if the vertices before you were an end, dont draw branches to it
+    
     def drawBody(self, pos, quat, radius=1, keepDrawing=True, numVertices=16):
+        """
+        this draws the body of the tree. This draws a ring of vertices and connects the rings with
+        triangles to form the body.
+        
+        the keepDrawing paramter tells the function whether or not we're at an end
+        if the vertices before you were an end, dont draw branches to it
+        """
         vdata = self.bodydata
         circleGeom = Geom(vdata)
         vertWriter = GeomVertexWriter(vdata, "vertex")
@@ -132,10 +157,10 @@ class FractalTree(NodePath):
         if (startRow != 0):
             texReWriter.setRow(startRow - numVertices)
             sCoord = texReWriter.getData2f().getX() + 1           
-            draw=(startRow - numVertices) in self.drawFlags
+            draw = (startRow - numVertices) in self.drawFlags
             if not draw:
                 sCoord -= 1
-        drawIndex=startRow
+        drawIndex = startRow
         texReWriter.setRow(startRow)   
        
         angleSlice = 2 * math.pi / numVertices
@@ -151,9 +176,9 @@ class FractalTree(NodePath):
             texReWriter.addData2f(1.0 * i / numVertices, sCoord)
             if keepDrawing:
                 self.drawFlags.add(drawIndex)
-            drawIndex+=1
+            drawIndex += 1
             currAngle += angleSlice
-        draw=(startRow - numVertices) in self.drawFlags 
+        draw = (startRow - numVertices) in self.drawFlags 
         #we cant draw quads directly so we use Tristrips
         if (startRow != 0) and draw:
             lines = GeomTristrips(Geom.UHStatic)         
@@ -170,8 +195,10 @@ class FractalTree(NodePath):
             self.numPrimitives += numVertices * 2
             self.bodies.attachNewNode(circleGeomNode)
    
-    #this draws leafs when we reach an end       
     def drawLeaf(self, pos=Vec3(0, 0, 0), quat=None, scale=0.125):
+        """
+        this draws leafs when we reach an end
+        """
         #use the vectors that describe the direction the branch grows to make the right
         #rotation matrix
         newCs = Mat4() 
@@ -184,6 +211,9 @@ class FractalTree(NodePath):
 
        
     def grow(self, num=1, removeLeaves=True, leavesScale=1, scale=1.125):
+        """
+        Grows the tree num steps
+        """
         self.iterations += num
         while num > 0:
             self.setScale(self, scale)
@@ -195,9 +225,15 @@ class FractalTree(NodePath):
             self.bodies.setTexture(self.barkTexture)         
             num -= 1
 
-class SimpleTree(FractalTree):        
+class SimpleTree(FractalTree):
+    """
+    Baseclass for simple trees
+    """        
     @staticmethod
     def makeRadiusList(radius, iterations, numCopiesList, scale=1.125):
+        """
+        make a basic radiuslist
+        """
         l = [radius]
         for i in xrange(1, iterations):
             if i != 1 and numCopiesList[i - 2]:
@@ -209,6 +245,9 @@ class SimpleTree(FractalTree):
    
     @staticmethod
     def makeLengthList(length, iterations, sx=1.125, sy=1.125, sz=1.125):
+        """
+        make a basic lengthlist
+        """
         l = [length]
         for i in xrange(1, iterations):
             length = Vec3(length.getX() / sx, length.getY() / sy , length.getZ() / sz)
@@ -217,6 +256,10 @@ class SimpleTree(FractalTree):
    
     @staticmethod
     def makeNumCopiesList(numCopies, branchat, iterations):
+        """
+        make a basic numpobieslist
+        branching each branchat iterations with numCopies branches each
+        """
         l = list()
         for i in xrange(iterations):
             if i % int(branchat) == 0:
@@ -227,11 +270,17 @@ class SimpleTree(FractalTree):
 
 
 class DefaultTree(SimpleTree):
+    """
+    Example tree class
+    """
     barkTexturePath = "models/tree/default/barkTexture.jpg"
     leafModelPath = 'models/tree/default/shrubbery'
     leafTexturePath = 'models/tree/default/material-10-cl.png'
     
-    def __init__(self, radius=0.5, numCopies=3, branchat=3, iterations=64):       
+    def __init__(self, radius=0.5, numCopies=3, branchat=3, iterations=64):
+        """
+        make new tree using few parameters
+        """       
         barkTexture = base.loader.loadTexture(self.barkTexturePath)
         leafModel = base.loader.loadModel(self.leafModelPath)
         leafModel.clearModelNodes()
