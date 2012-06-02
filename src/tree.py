@@ -210,11 +210,11 @@ FractalTree.makeFMT()
 
 class DefaultTree(FractalTree):
     def __init__(self):       
-        barkTexture = base.loader.loadTexture("models/tree/barkTexture.jpg")
-        leafModel = base.loader.loadModel('models/tree/shrubbery')
+        barkTexture = base.loader.loadTexture("models/tree/default/barkTexture.jpg")
+        leafModel = base.loader.loadModel('models/tree/default/shrubbery')
         leafModel.clearModelNodes()
         leafModel.flattenStrong()
-        leafTexture = base.loader.loadTexture('models/tree/material-10-cl.png')
+        leafTexture = base.loader.loadTexture('models/tree/default/material-10-cl.png')
         leafModel.setTexture(leafTexture, 1)       
         lengthList = self.makeLengthList(Vec3(0, 0, 1), 64)
         numCopiesList = self.makeNumCopiesList(3, 3, 64)
