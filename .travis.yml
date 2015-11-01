@@ -3,7 +3,7 @@ sudo: required
 python:
   - "2.7"
  before_install:
-  - wget https://www.panda3d.org/download/panda3d-1.8.1/panda3d1.8_1.8.1~precise_amd64.deb
-  - sudo dpkg -i panda3d1.8_1.8.1~precise_amd64.deb
+  - "wget https://www.panda3d.org/download/panda3d-1.8.1/panda3d1.8_1.8.1~precise_amd64.deb"
+  - "sudo dpkg -i panda3d1.8_1.8.1~precise_amd64.deb"
 install: true
-script: python pandaplant/demo.py
+script: "python pandaplant/demo.py"
