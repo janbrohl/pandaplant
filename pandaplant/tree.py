@@ -32,11 +32,11 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 '''
-#pandac.PandaModules on older panda3d versions
+# pandac.PandaModules on older panda3d versions
 from panda3d.core import (NodePath, Geom, GeomNode,
-TransformState, GeomVertexWriter, GeomTristrips,
-GeomVertexRewriter, GeomVertexData, GeomVertexFormat,
-Mat4, Vec3, CollisionNode, CollisionTube, Point3, Quat)
+                          TransformState, GeomVertexWriter, GeomTristrips,
+                          GeomVertexRewriter, GeomVertexData, GeomVertexFormat,
+                          Mat4, Vec3, CollisionNode, CollisionTube, Point3, Quat)
 import math
 import random
 
@@ -53,21 +53,21 @@ def clamp(value, minval, maxval):
         return value
 
 
-#this is for making the tree not too straight
+# this is for making the tree not too straight
 def _randomBend(quat, maxBend=30):
-    #angle=clamp(random.gauss(0,45),-90,90)
-    #not sure which is better
+    # angle=clamp(random.gauss(0,45),-90,90)
+    # not sure which is better
     angle = random.randint(-90, 90)
     return _angleRandomAxis(quat, angle, maxBend)
 
 
 def _angleRandomAxis(quat, angle, maxBend=30):
     q = Quat()
-    #power of 2 here makes distribution even withint a circle
+    # power of 2 here makes distribution even withint a circle
     # (makes larger bends are more likley as they are further spread)
     bendAngle = (random.random() ** 2) * maxBend
-    #gauss might be more realistic but actually is far from perfect
-    #bendAngle=clamp(random.gauss(0,maxBend*0.5),0,maxBend)
+    # gauss might be more realistic but actually is far from perfect
+    # bendAngle=clamp(random.gauss(0,maxBend*0.5),0,maxBend)
     q.setHpr((angle, bendAngle, 0))
     return q * quat
 
@@ -76,6 +76,7 @@ class FractalTree(NodePath):
     """
     Base class for fractal trees
     """
+
     def __init__(self, barkTexture, leafModel,
                  lengthList, numCopiesList, radiusList):
         """
@@ -99,7 +100,7 @@ class FractalTree(NodePath):
 
         self.makeEnds()
         self.makeFromStack(True)
-        #self.coll.show()
+        # self.coll.show()
         self.bodies.setTexture(barkTexture)
         self.coll.reparentTo(self)
         self.bodies.reparentTo(self)
@@ -136,7 +137,7 @@ class FractalTree(NodePath):
             length = lengthList[depth]
             if depth != to and depth + 1 < len(lengthList):
                 self.drawBody(pos, quat, radiusList[depth])
-                #move foward along the right axis
+                # move foward along the right axis
                 newPos = pos + quat.xform(length)
                 if makeColl:
                     self.makeColl(pos, newPos, radiusList[depth])
@@ -148,11 +149,11 @@ class FractalTree(NodePath):
                                                        2 * math.pi * i /
                                                        numCopies),
                                       depth + 1))
-                        #stack.append((newPos, _randomAxis(vecList,3),
-                        #depth + 1))
+                        # stack.append((newPos, _randomAxis(vecList,3),
+                        # depth + 1))
                 else:
-                    #just make another branch connected to this one with a
-                    #small variation in direction
+                    # just make another branch connected to this one with a
+                    # small variation in direction
                     stack.append((newPos, _randomBend(quat, 20), depth + 1))
             else:
                 ends.append((pos, quat, depth))
@@ -198,9 +199,9 @@ class FractalTree(NodePath):
         currAngle = 0
         perp1 = quat.getRight()
         perp2 = quat.getForward()
-        #vertex information is written here
+        # vertex information is written here
         for i in xrange(numVertices + 1):
-            #doubles the last vertex to fix UV seam
+            # doubles the last vertex to fix UV seam
             adjCircle = pos + (perp1 * math.cos(currAngle) +
                                perp2 * math.sin(currAngle)) * radius
             normal = perp1 * math.cos(currAngle) + perp2 * math.sin(currAngle)
@@ -212,7 +213,7 @@ class FractalTree(NodePath):
             drawIndex += 1
             currAngle += angleSlice
         draw = (startRow - numVertices) in self.drawFlags
-        #we cant draw quads directly so we use Tristrips
+        # we cant draw quads directly so we use Tristrips
         if (startRow != 0) and draw:
             lines = GeomTristrips(Geom.UHStatic)
             for i in xrange(numVertices + 1):
@@ -221,7 +222,7 @@ class FractalTree(NodePath):
             lines.addVertex(startRow)
             lines.addVertex(startRow - numVertices)
             lines.closePrimitive()
-            #lines.decompose()
+            # lines.decompose()
             circleGeom.addPrimitive(lines)
             circleGeomNode = GeomNode("Debug")
             circleGeomNode.addGeom(circleGeom)
@@ -232,8 +233,8 @@ class FractalTree(NodePath):
         """
         this draws leafs when we reach an end
         """
-        #use the vectors that describe the direction the branch grows to make
-        #the right rotation matrix
+        # use the vectors that describe the direction the branch grows to make
+        # the right rotation matrix
         newCs = Mat4()
         quat.extractToMatrix(newCs)
         axisAdj = Mat4.scaleMat(scale) * newCs * Mat4.translateMat(pos)
@@ -329,25 +330,25 @@ class DefaultTree(SimpleTree):
                             lengthList, numCopiesList, radiusList)
 
 
-#this grows a tree
+# this grows a tree
 if __name__ == "__main__":
     from direct.showbase.ShowBase import ShowBase
     base = ShowBase()
     base.cam.setPos(0, -10, 10)
     t = DefaultTree()
     t.reparentTo(base.render)
-    #make an optimized snapshot of the current tree
+    # make an optimized snapshot of the current tree
     np = t.getStatic()
     np.setPos(10, 10, 0)
     np.reparentTo(base.render)
-    #demonstrate growing
+    # demonstrate growing
     last = [0]  # a bit hacky
 
     def grow(task):
         if task.time > last[0] + 1:
             t.grow()
             last[0] = task.time
-            #t.leaves.detachNode()
+            # t.leaves.detachNode()
         if last[0] > 10:
             return task.done
         return task.cont
