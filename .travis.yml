@@ -1,0 +1,6 @@
+language: python
+sudo: required
+python:
+  - "2.7"
+install: sudo apt-get install panda3d1.9.0
+script: python pandaplant/demo.py
