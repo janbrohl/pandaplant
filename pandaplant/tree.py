@@ -33,7 +33,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 '''
 # pandac.PandaModules on older panda3d versions
-from panda3d.core import (NodePath, Geom, GeomNode,
+from panda3d.core import (NodePath, Geom, GeomNode, Texture,
                           TransformState, GeomVertexWriter, GeomTristrips,
                           GeomVertexRewriter, GeomVertexData, GeomVertexFormat,
                           Mat4, Vec3, CollisionNode, CollisionTube, Point3, Quat)
@@ -318,10 +318,12 @@ class DefaultTree(SimpleTree):
         make new tree using few parameters
         """
         barkTexture = base.loader.loadTexture(self.barkTexturePath)
+        barkTexture.setMinfilter(Texture.FTLinearMipmapLinear)
         leafModel = base.loader.loadModel(self.leafModelPath)
         leafModel.clearModelNodes()
         leafModel.flattenStrong()
         leafTexture = base.loader.loadTexture(self.leafTexturePath)
+        leafTexture.setMinfilter(Texture.FTLinearMipmapLinear)
         leafModel.setTexture(leafTexture, 1)
         lengthList = self.makeLengthList(Vec3(0, 0, 1), iterations)
         numCopiesList = self.makeNumCopiesList(numCopies, branchat, iterations)
