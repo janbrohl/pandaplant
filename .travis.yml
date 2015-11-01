@@ -1,9 +1,10 @@
 sudo: required
 language: python
 python:
-  - "2.7"
+ - "2.7"
 before_install:
-  - "wget https://www.panda3d.org/download/panda3d-1.8.1/panda3d1.8_1.8.1~precise_amd64.deb"
-  - "sudo dpkg -i panda3d1.8_1.8.1~precise_amd64.deb"
+ - "sudo apt-get install python-dev libpng-dev zlib1g-dev libssl-dev libx11-dev libgl1-mesa-dev libxrandr-dev libxxf86dga-dev libxcursor-dev bison flex libfreetype6-dev libvorbis-dev libjpeg-dev libopenal-dev libode-dev nvidia-cg-toolkit"
+ - "wget https://www.panda3d.org/download/panda3d-1.8.1/panda3d1.8_1.8.1~precise_amd64.deb"
+ - "sudo dpkg -i panda3d1.8_1.8.1~precise_amd64.deb"
 install: true
 script: "python pandaplant/demo.py"
