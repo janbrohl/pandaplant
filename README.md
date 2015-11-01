@@ -1,16 +1,20 @@
 pandaplant
-##########
+==========
 
-Created on 11.12.2010
+(First posted on http://www.panda3d.org/forums/viewtopic.php?f=8&t=10484 )
+
+(Automatically exported from https://code.google.com/p/pandaplant )
+
+Created on 11.12.2010 by Jan Brohl
+
 Based on Kwasi Mensah's (kmensah@andrew.cmu.edu)
 "The Fractal Plants Sample Program" from 8/05/2005
 
-author: Jan Brohl
-
-license: BSD-license
-
 Quat-patch and improved drawBody by Craig Macomber
-(see discussion on http://www.panda3d.org/forums/viewtopic.php?f=8&t=10484 )
+(see discussion on http://www.panda3d.org/forums/viewtopic.php?f=8&t=10484)
+
+License: BSD-license
+--------------------
 
 >Copyright (c) 2012, Jan Brohl
 >
