@@ -3,8 +3,8 @@ language: python
 python:
  - "2.7"
 before_install:
- - "wget https://www.panda3d.org/download/panda3d-1.8.1/panda3d1.8_1.8.1~precise_amd64.deb"
- - "sudo dpkg --install --force-depends panda3d1.8_1.8.1~precise_amd64.deb"
- - "sudo apt-get -f install"
+ - sudo echo "deb http://archive.panda3d.org/ubuntu precise main" >> /etc/apt/sources.list
+ - sudo apt-get update
+ - sudo apt-get install panda3d
 install: true
-script: "python pandaplant/demo.py"
+script: python pandaplant/demo.py
