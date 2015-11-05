@@ -5,6 +5,6 @@ python:
 before_install:
  - sudo sh -c 'echo "deb http://archive.panda3d.org/ubuntu precise main" >> /etc/apt/sources.list'
  - sudo apt-get update
- - sudo apt-get install panda3d
+ - sudo apt-get install panda3d --force-yes
 install: true
 script: python pandaplant/demo.py
