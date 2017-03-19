@@ -1,6 +1,8 @@
 pandaplant
 ==========
 
+[![Say Thanks!](https://img.shields.io/badge/Say%20Thanks!-%F0%9F%A6%89-1EAEDB.svg)](https://saythanks.io/to/janbrohl)
+
 (First posted on http://www.panda3d.org/forums/viewtopic.php?f=8&t=10484 )
 
 (Automatically exported from https://code.google.com/p/pandaplant )
